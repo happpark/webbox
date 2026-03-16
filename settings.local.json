@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git config:*)",
+      "Bash(gh auth status:*)",
+      "Bash(ssh-keygen:*)",
+      "Bash(ssh-add:*)",
+      "Bash(ssh:*)",
+      "Bash(git clone:*)",
+      "Bash(sleep:*)",
+      "Bash(find:*)",
+      "Bash(npx tsc:*)",
+      "Bash(grep:*)",
+      "Bash(npx next:*)",
+      "Bash(python3:*)",
+      "Bash(.venv/bin/python3 backtest.py '{\"SPY\": 0.6, \"TLT\": 0.4}' 2>&1)",
+      "Bash(say:*)",
+      "Bash(.venv/bin/python3 fetch_all.py 2>&1)",
+      "Bash(.venv/bin/python3 fix_missing.py 2>&1 | tee /tmp/fix_missing_log.txt; say \"Done\")",
+      "Bash(afplay:*)",
+      "Bash(open:*)",
+      "Bash(ls:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(which vercel:*)",
+      "Bash(vercel:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(node:*)",
+      "Bash(node_modules/.bin/tsx --tsconfig tsconfig.json /tmp/test_backtest.ts 2>&1 || \\\\\nnode_modules/.bin/tsx --no-cache --tsconfig '{\"compilerOptions\":{\"module\":\"ESNext\",\"moduleResolution\":\"bundler\",\"target\":\"ES2022\"}}' /tmp/test_backtest.ts 2>&1)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)",
+      "Bash(ACTION_ID=\"40658255745e0ee64abdffaac866f921c71d81fc4e\"\ncurl -s -X POST http://localhost:9002/ \\\\\n  -H \"Content-Type: application/json\" \\\\\n  -H \"Next-Action: ${ACTION_ID}\" \\\\\n  -d '[{\"assets\":[{\"ticker\":\"SPY\",\"weight\":60},{\"ticker\":\"BND\",\"weight\":40}]}]' | head -c 500)",
+      "Bash(cd:*)"
+    ]
+  }
+}
