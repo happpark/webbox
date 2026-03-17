@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Menu, X, Zap } from 'lucide-react';
+import { Menu, X, Zap, Star } from 'lucide-react';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -32,6 +32,12 @@ export default function Header() {
 
           <div className="flex items-center gap-3">
             <Link
+              href="/favorites"
+              className="hidden md:inline-flex items-center gap-1.5 text-gray-400 hover:text-yellow-400 transition-colors text-sm"
+            >
+              <Star className="w-3.5 h-3.5" /> Favorites
+            </Link>
+            <Link
               href="/submit"
               className="hidden md:inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             >
@@ -53,6 +59,7 @@ export default function Header() {
             <Link href="/browse" className="block text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Browse</Link>
             <Link href="/browse?sort=trending" className="block text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Trending</Link>
             <Link href="/browse?sort=new" className="block text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>New</Link>
+            <Link href="/favorites" className="block text-gray-400 hover:text-yellow-400 text-sm flex items-center gap-1.5" onClick={() => setMenuOpen(false)}><Star className="w-3.5 h-3.5" /> Favorites</Link>
             <Link href="/submit" className="block bg-violet-600 text-white px-4 py-2 rounded-lg text-sm text-center" onClick={() => setMenuOpen(false)}>+ Submit App</Link>
           </div>
         </div>

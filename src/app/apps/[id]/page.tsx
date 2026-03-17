@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink, Github, ThumbsUp, Tag } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Github, ThumbsUp, Tag, Star } from 'lucide-react';
 import { App } from '@/types';
 import { CATEGORIES, SEED_APPS } from '@/lib/data';
 import { timeAgo } from '@/lib/utils';
@@ -13,11 +13,14 @@ export default function AppDetailPage() {
   const router = useRouter();
   const [app, setApp] = useState<App | null>(null);
   const [voted, setVoted] = useState(false);
+  const [favorited, setFavorited] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const savedVotes = JSON.parse(localStorage.getItem('webbox_votes') ?? '[]');
     setVoted(savedVotes.includes(id));
+    const savedFavs = JSON.parse(localStorage.getItem('webbox_favorites') ?? '[]');
+    setFavorited(savedFavs.includes(id));
 
     // Try to fetch from API, fall back to seed data
     fetch(`/api/apps`)
@@ -34,6 +37,16 @@ export default function AppDetailPage() {
       })
       .catch(() => setLoading(false));
   }, [id, router]);
+
+  function handleFavorite() {
+    const saved: string[] = JSON.parse(localStorage.getItem('webbox_favorites') ?? '[]');
+    if (favorited) {
+      localStorage.setItem('webbox_favorites', JSON.stringify(saved.filter((v) => v !== id)));
+    } else {
+      localStorage.setItem('webbox_favorites', JSON.stringify([...saved, id]));
+    }
+    setFavorited(!favorited);
+  }
 
   function handleVote() {
     const savedVotes = JSON.parse(localStorage.getItem('webbox_votes') ?? '[]');
@@ -153,6 +166,18 @@ export default function AppDetailPage() {
           >
             <ThumbsUp className="w-4 h-4" />
             {voted ? 'Voted' : 'Vote'} · {app.votes}
+          </button>
+
+          <button
+            onClick={handleFavorite}
+            className={`flex items-center justify-center gap-2 w-full py-3 rounded-xl font-medium transition-all border ${
+              favorited
+                ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30'
+                : 'bg-white/5 hover:bg-white/10 text-gray-300 border-white/10'
+            }`}
+          >
+            <Star className={`w-4 h-4 ${favorited ? 'fill-yellow-400' : ''}`} />
+            {favorited ? 'Saved' : 'Save'}
           </button>
 
           {app.github_url && (

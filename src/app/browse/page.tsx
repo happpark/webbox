@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { Star } from 'lucide-react';
 import { CATEGORIES } from '@/lib/data';
 import CategoryFilter from '@/components/CategoryFilter';
 import SortBar from '@/components/SortBar';
@@ -12,6 +13,7 @@ function BrowseContent() {
   const searchParams = useSearchParams();
   const [apps, setApps] = useState<App[]>([]);
   const [voted, setVoted] = useState<Set<string>>(new Set());
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
   const category = searchParams.get('category');
@@ -19,8 +21,8 @@ function BrowseContent() {
   const q = searchParams.get('q');
 
   useEffect(() => {
-    const savedVotes = JSON.parse(localStorage.getItem('webbox_votes') ?? '[]');
-    setVoted(new Set(savedVotes));
+    setVoted(new Set(JSON.parse(localStorage.getItem('webbox_votes') ?? '[]')));
+    setFavorites(new Set(JSON.parse(localStorage.getItem('webbox_favorites') ?? '[]')));
   }, []);
 
   useEffect(() => {
@@ -37,6 +39,16 @@ function BrowseContent() {
         setLoading(false);
       });
   }, [category, sort, q]);
+
+  function toggleFavorite(appId: string) {
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      if (next.has(appId)) next.delete(appId);
+      else next.add(appId);
+      localStorage.setItem('webbox_favorites', JSON.stringify([...next]));
+      return next;
+    });
+  }
 
   function handleVote(appId: string) {
     setVoted((prev) => {
@@ -103,24 +115,29 @@ function BrowseContent() {
             {apps.map((app) => {
               const category = CATEGORIES.find((c) => c.id === app.category_id);
               const tagline = app.tagline.length > 38 ? app.tagline.slice(0, 38) + '…' : app.tagline;
+              const isFav = favorites.has(app.id);
               return (
-                <a
-                  key={app.id}
-                  href={`/apps/${app.id}`}
-                  className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-white/5 transition-colors group"
-                >
-                  <div className="w-9 h-9 rounded-lg overflow-hidden bg-gradient-to-br from-gray-700 to-gray-800 border border-white/10 shrink-0 flex items-center justify-center">
-                    {app.screenshot_url ? (
-                      <img src={app.screenshot_url} alt={app.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-base">{category?.icon ?? '📦'}</span>
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-white text-xs font-medium leading-tight truncate group-hover:text-violet-300 transition-colors">{app.name}</p>
-                    <p className="text-gray-500 text-xs leading-tight mt-0.5 truncate">{tagline}</p>
-                  </div>
-                </a>
+                <div key={app.id} className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-white/5 transition-colors group">
+                  <a href={`/apps/${app.id}`} className="flex items-center gap-2.5 flex-1 min-w-0">
+                    <div className="w-9 h-9 rounded-lg overflow-hidden bg-gradient-to-br from-gray-700 to-gray-800 border border-white/10 shrink-0 flex items-center justify-center">
+                      {app.screenshot_url ? (
+                        <img src={app.screenshot_url} alt={app.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-base">{category?.icon ?? '📦'}</span>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-white text-xs font-medium leading-tight truncate group-hover:text-violet-300 transition-colors">{app.name}</p>
+                      <p className="text-gray-500 text-xs leading-tight mt-0.5 truncate">{tagline}</p>
+                    </div>
+                  </a>
+                  <button
+                    onClick={() => toggleFavorite(app.id)}
+                    className={`shrink-0 p-1 rounded-lg transition-all ${isFav ? 'text-yellow-400' : 'text-gray-700 hover:text-gray-400 opacity-0 group-hover:opacity-100'}`}
+                  >
+                    <Star className={`w-3.5 h-3.5 ${isFav ? 'fill-yellow-400' : ''}`} />
+                  </button>
+                </div>
               );
             })}
           </div>
