@@ -5,10 +5,11 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { name, tagline, description, url, screenshot_url, category_id, author_name, author_url, github_url, tags } = body;
 
-  // Basic validation
   if (!name || !tagline || !url || !category_id) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
+
+  let appId: string | null = null;
 
   try {
     const { data, error } = await supabase.from('apps').insert({
@@ -25,14 +26,25 @@ export async function POST(req: NextRequest) {
       votes: 0,
       featured: false,
       approved: false,
+      review_status: 'pending',
     }).select().single();
 
     if (error) throw error;
-
-    return NextResponse.json({ success: true, app: data });
+    appId = data.id;
   } catch (err) {
-    // Supabase not configured, just return success
-    console.error(err);
+    console.error('Insert failed:', err);
     return NextResponse.json({ success: true, pending: true });
   }
+
+  // Trigger async review (fire and forget — don't await)
+  if (appId) {
+    const origin = req.headers.get('origin') ?? req.nextUrl.origin;
+    fetch(`${origin}/api/review`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ appId }),
+    }).catch((e) => console.error('Review trigger failed:', e));
+  }
+
+  return NextResponse.json({ success: true, appId, message: 'Submitted! Your app is being reviewed automatically.' });
 }
