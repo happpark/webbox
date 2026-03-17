@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import AppCard from '@/components/AppCard';
+import AppRow from '@/components/AppRow';
 import CategoryFilter from '@/components/CategoryFilter';
 import SortBar from '@/components/SortBar';
 import SearchBar from '@/components/SearchBar';
@@ -54,7 +54,7 @@ function BrowseContent() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">Browse Apps</h1>
         <p className="text-gray-400">
@@ -67,7 +67,7 @@ function BrowseContent() {
       </div>
 
       {/* Filters */}
-      <div className="space-y-4 mb-8">
+      <div className="space-y-4 mb-6">
         <SearchBar placeholder="Search apps by name, tag, or description..." />
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <CategoryFilter />
@@ -77,15 +77,15 @@ function BrowseContent() {
 
       {/* Results */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array(9).fill(0).map((_, i) => (
-            <div key={i} className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden animate-pulse">
-              <div className="h-44 bg-white/5" />
-              <div className="p-4 space-y-2">
-                <div className="h-4 bg-white/5 rounded w-2/3" />
-                <div className="h-3 bg-white/5 rounded w-full" />
-                <div className="h-3 bg-white/5 rounded w-4/5" />
+        <div className="space-y-1">
+          {Array(15).fill(0).map((_, i) => (
+            <div key={i} className="flex items-center gap-3 px-3 py-2.5 animate-pulse">
+              <div className="w-10 h-10 rounded-xl bg-white/5 shrink-0" />
+              <div className="flex-1 space-y-1.5">
+                <div className="h-3 bg-white/5 rounded w-32" />
+                <div className="h-2.5 bg-white/5 rounded w-48" />
               </div>
+              <div className="w-12 h-7 bg-white/5 rounded-lg" />
             </div>
           ))}
         </div>
@@ -99,10 +99,10 @@ function BrowseContent() {
         </div>
       ) : (
         <>
-          <p className="text-gray-500 text-sm mb-4">{apps.length} apps found</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <p className="text-gray-600 text-xs mb-2 px-3">{apps.length} apps</p>
+          <div className="divide-y divide-white/5">
             {apps.map((app) => (
-              <AppCard
+              <AppRow
                 key={app.id}
                 app={app}
                 onVote={handleVote}
