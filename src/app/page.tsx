@@ -145,6 +145,11 @@ export default function HomePage() {
                 const { dy, opacity } = iconMeta(i);
                 const hoverScale = getHoverScale(i);
                 const isActive   = hoverScale > 1.05;
+                const el = iconRefs.current[i];
+                const isCenter = !!(mouse && el && (() => {
+                  const r = el.getBoundingClientRect();
+                  return mouse.x >= r.left && mouse.x <= r.right && mouse.y >= r.top && mouse.y <= r.bottom;
+                })());
                 const category   = CATEGORIES.find((c) => c.id === app.category_id);
 
                 return (
@@ -184,7 +189,7 @@ export default function HomePage() {
                       className="absolute bottom-full left-1/2 mb-2 px-2 py-1 bg-gray-900/95 border border-white/10 text-white text-xs rounded-lg whitespace-nowrap pointer-events-none z-30 shadow-xl"
                       style={{
                         transform: 'translateX(-50%)',
-                        opacity: isActive ? 1 : 0,
+                        opacity: isCenter ? 1 : 0,
                         transition: 'opacity 0.15s ease',
                       }}
                     >
