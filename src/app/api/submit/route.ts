@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { after } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { runReview } from '@/lib/review';
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -36,14 +38,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, pending: true });
   }
 
-  // Trigger async review (fire and forget — don't await)
+  // Run review after response is sent — after() keeps the function alive
   if (appId) {
-    const origin = req.headers.get('origin') ?? req.nextUrl.origin;
-    fetch(`${origin}/api/review`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ appId }),
-    }).catch((e) => console.error('Review trigger failed:', e));
+    const id = appId;
+    after(async () => {
+      await runReview(id);
+    });
   }
 
   return NextResponse.json({ success: true, appId, message: 'Submitted! Your app is being reviewed automatically.' });
