@@ -95,7 +95,7 @@ export default function HomePage() {
             href="/browse"
             className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white px-6 py-3 rounded-xl font-medium transition-colors"
           >
-            Browse All Apps <ArrowRight className="w-4 h-4" />
+            See All Apps <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
             href="/submit"
