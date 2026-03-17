@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   try {
     let query = supabase
       .from('apps')
-      .select('*, category:categories(*)')
+      .select('*')
       .eq('approved', true);
 
     if (category) {
@@ -35,11 +35,17 @@ export async function GET(req: NextRequest) {
       query = query.order('votes', { ascending: false });
     }
 
-    const { data, error } = await query.limit(50);
+    const { data, error } = await query.limit(100);
 
     if (error) throw error;
 
-    return NextResponse.json({ apps: data });
+    // Attach category from local data (no DB join needed)
+    const apps = (data ?? []).map((app: App) => ({
+      ...app,
+      category: CATEGORIES.find((c) => c.id === app.category_id),
+    }));
+
+    return NextResponse.json({ apps });
   } catch {
     // Supabase not configured, return seed data
     let apps = SEED_APPS.map((app, i) => ({
