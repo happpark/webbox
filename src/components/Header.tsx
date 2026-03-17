@@ -2,10 +2,12 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Menu, X, Zap, Star } from 'lucide-react';
+import { Menu, X, Zap, Star, LogIn, LogOut } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user, loading, signInWithGoogle, signOut } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/10">
@@ -37,6 +39,36 @@ export default function Header() {
             >
               <Star className="w-3.5 h-3.5" /> Favorites
             </Link>
+
+            {!loading && (
+              user ? (
+                <div className="flex items-center gap-2">
+                  {user.user_metadata?.avatar_url && (
+                    <img
+                      src={user.user_metadata.avatar_url}
+                      alt={user.user_metadata.full_name ?? 'User'}
+                      className="w-7 h-7 rounded-full border border-white/20"
+                    />
+                  )}
+                  <button
+                    onClick={signOut}
+                    className="hidden md:inline-flex items-center gap-1.5 text-gray-400 hover:text-white transition-colors text-sm"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    Sign out
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={signInWithGoogle}
+                  className="hidden md:inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  Sign in
+                </button>
+              )
+            )}
+
             <Link
               href="/submit"
               className="hidden md:inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
@@ -59,7 +91,20 @@ export default function Header() {
             <Link href="/browse" className="block text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Browse</Link>
             <Link href="/browse?sort=trending" className="block text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Trending</Link>
             <Link href="/browse?sort=new" className="block text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>New</Link>
-            <Link href="/favorites" className="block text-gray-400 hover:text-yellow-400 text-sm flex items-center gap-1.5" onClick={() => setMenuOpen(false)}><Star className="w-3.5 h-3.5" /> Favorites</Link>
+            <Link href="/favorites" className="flex items-center gap-1.5 text-gray-400 hover:text-yellow-400 text-sm" onClick={() => setMenuOpen(false)}>
+              <Star className="w-3.5 h-3.5" /> Favorites
+            </Link>
+            {!loading && (
+              user ? (
+                <button onClick={() => { signOut(); setMenuOpen(false); }} className="flex items-center gap-1.5 text-gray-400 hover:text-white text-sm">
+                  <LogOut className="w-3.5 h-3.5" /> Sign out
+                </button>
+              ) : (
+                <button onClick={() => { signInWithGoogle(); setMenuOpen(false); }} className="flex items-center gap-1.5 text-gray-400 hover:text-white text-sm">
+                  <LogIn className="w-3.5 h-3.5" /> Sign in with Google
+                </button>
+              )
+            )}
             <Link href="/submit" className="block bg-violet-600 text-white px-4 py-2 rounded-lg text-sm text-center" onClick={() => setMenuOpen(false)}>+ Submit App</Link>
           </div>
         </div>

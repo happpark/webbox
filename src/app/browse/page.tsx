@@ -8,13 +8,14 @@ import CategoryFilter from '@/components/CategoryFilter';
 import SortBar from '@/components/SortBar';
 import SearchBar from '@/components/SearchBar';
 import { App } from '@/types';
+import { useFavorites } from '@/hooks/useFavorites';
 
 function BrowseContent() {
   const searchParams = useSearchParams();
   const [apps, setApps] = useState<App[]>([]);
   const [voted, setVoted] = useState<Set<string>>(new Set());
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const { favorites, toggle: toggleFavorite } = useFavorites();
 
   const category = searchParams.get('category');
   const sort = searchParams.get('sort') ?? 'trending';
@@ -22,7 +23,6 @@ function BrowseContent() {
 
   useEffect(() => {
     setVoted(new Set(JSON.parse(localStorage.getItem('webbox_votes') ?? '[]')));
-    setFavorites(new Set(JSON.parse(localStorage.getItem('webbox_favorites') ?? '[]')));
   }, []);
 
   useEffect(() => {
@@ -39,16 +39,6 @@ function BrowseContent() {
         setLoading(false);
       });
   }, [category, sort, q]);
-
-  function toggleFavorite(appId: string) {
-    setFavorites((prev) => {
-      const next = new Set(prev);
-      if (next.has(appId)) next.delete(appId);
-      else next.add(appId);
-      localStorage.setItem('webbox_favorites', JSON.stringify([...next]));
-      return next;
-    });
-  }
 
   function handleVote(appId: string) {
     setVoted((prev) => {

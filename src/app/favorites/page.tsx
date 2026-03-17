@@ -1,52 +1,57 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Star } from 'lucide-react';
+import { Star, LogIn } from 'lucide-react';
 import Link from 'next/link';
 import { App } from '@/types';
 import { CATEGORIES } from '@/lib/data';
+import { useFavorites } from '@/hooks/useFavorites';
+import { useAuth } from '@/context/AuthContext';
 
 export default function FavoritesPage() {
   const [apps, setApps] = useState<App[]>([]);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(true);
+  const [allApps, setAllApps] = useState<App[]>([]);
+  const [appsLoading, setAppsLoading] = useState(true);
+  const { favorites, toggle, ready } = useFavorites();
+  const { user, loading: authLoading, signInWithGoogle } = useAuth();
 
   useEffect(() => {
-    const saved: string[] = JSON.parse(localStorage.getItem('webbox_favorites') ?? '[]');
-    if (saved.length === 0) { setLoading(false); return; }
-    setFavorites(new Set(saved));
-
     fetch('/api/apps')
       .then((r) => r.json())
       .then((data) => {
-        const all: App[] = data.apps ?? [];
-        setApps(all.filter((a) => saved.includes(a.id)));
-        setLoading(false);
+        setAllApps(data.apps ?? []);
+        setAppsLoading(false);
       });
   }, []);
 
-  function toggleFav(appId: string) {
-    setFavorites((prev) => {
-      const next = new Set(prev);
-      if (next.has(appId)) next.delete(appId);
-      else next.add(appId);
-      localStorage.setItem('webbox_favorites', JSON.stringify([...next]));
-      return next;
-    });
-    setApps((prev) => prev.filter((a) => {
-      const saved: string[] = JSON.parse(localStorage.getItem('webbox_favorites') ?? '[]');
-      return saved.includes(a.id);
-    }));
-  }
+  useEffect(() => {
+    if (!ready || appsLoading) return;
+    setApps(allApps.filter((a) => favorites.has(a.id)));
+  }, [favorites, allApps, ready, appsLoading]);
+
+  const loading = authLoading || !ready || appsLoading;
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
-          <Star className="w-7 h-7 text-yellow-400 fill-yellow-400" />
-          Favorites
-        </h1>
-        <p className="text-gray-400">Apps you've starred</p>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
+            <Star className="w-7 h-7 text-yellow-400 fill-yellow-400" />
+            Favorites
+          </h1>
+          <p className="text-gray-400">
+            {user ? `Signed in as ${user.user_metadata?.full_name ?? user.email}` : 'Sign in to sync across devices'}
+          </p>
+        </div>
+        {!authLoading && !user && (
+          <button
+            onClick={signInWithGoogle}
+            className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+          >
+            <LogIn className="w-4 h-4" />
+            Sign in with Google
+          </button>
+        )}
       </div>
 
       {loading ? (
@@ -91,8 +96,8 @@ export default function FavoritesPage() {
                   </div>
                 </a>
                 <button
-                  onClick={() => toggleFav(app.id)}
-                  className="shrink-0 p-1 rounded-lg text-yellow-400 hover:text-yellow-300 transition-colors"
+                  onClick={() => toggle(app.id)}
+                  className="shrink-0 p-1 rounded-lg text-yellow-400 hover:text-gray-500 transition-colors"
                 >
                   <Star className="w-3.5 h-3.5 fill-yellow-400" />
                 </button>
