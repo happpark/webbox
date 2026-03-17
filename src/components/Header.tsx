@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Menu, X, Zap, Star, LogIn, LogOut } from 'lucide-react';
+import { Menu, X, Zap, Star, LogIn, LogOut, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 export default function Header() {
@@ -43,6 +43,12 @@ export default function Header() {
             {!loading && (
               user ? (
                 <div className="flex items-center gap-2">
+                  <Link
+                    href="/my-apps"
+                    className="hidden md:inline-flex items-center gap-1.5 text-gray-400 hover:text-violet-400 transition-colors text-sm"
+                  >
+                    <LayoutDashboard className="w-3.5 h-3.5" /> My Apps
+                  </Link>
                   {user.user_metadata?.avatar_url && (
                     <img
                       src={user.user_metadata.avatar_url}
@@ -96,9 +102,14 @@ export default function Header() {
             </Link>
             {!loading && (
               user ? (
-                <button onClick={() => { signOut(); setMenuOpen(false); }} className="flex items-center gap-1.5 text-gray-400 hover:text-white text-sm">
-                  <LogOut className="w-3.5 h-3.5" /> Sign out
-                </button>
+                <>
+                  <Link href="/my-apps" className="flex items-center gap-1.5 text-gray-400 hover:text-violet-400 text-sm" onClick={() => setMenuOpen(false)}>
+                    <LayoutDashboard className="w-3.5 h-3.5" /> My Apps
+                  </Link>
+                  <button onClick={() => { signOut(); setMenuOpen(false); }} className="flex items-center gap-1.5 text-gray-400 hover:text-white text-sm">
+                    <LogOut className="w-3.5 h-3.5" /> Sign out
+                  </button>
+                </>
               ) : (
                 <button onClick={() => { signInWithGoogle(); setMenuOpen(false); }} className="flex items-center gap-1.5 text-gray-400 hover:text-white text-sm">
                   <LogIn className="w-3.5 h-3.5" /> Sign in with Google

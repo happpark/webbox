@@ -4,9 +4,12 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { CATEGORIES } from '@/lib/data';
+import { getSupabase } from '@/lib/supabase';
+import { useAuth } from '@/context/AuthContext';
 
 export default function SubmitPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [form, setForm] = useState({
     name: '',
@@ -30,10 +33,17 @@ export default function SubmitPage() {
     setStatus('loading');
 
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (user) {
+        const { data } = await getSupabase().auth.getSession();
+        if (data.session?.access_token) {
+          headers['Authorization'] = `Bearer ${data.session.access_token}`;
+        }
+      }
       const res = await fetch('/api/submit', {
         method: 'POST',
         body: JSON.stringify(form),
-        headers: { 'Content-Type': 'application/json' },
+        headers,
       });
       if (res.ok) {
         setStatus('success');

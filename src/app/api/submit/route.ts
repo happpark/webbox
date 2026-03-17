@@ -2,6 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { after } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { runReview } from '@/lib/review';
+import { createClient } from '@supabase/supabase-js';
+
+async function getUserFromToken(token: string | null) {
+  if (!token) return null;
+  try {
+    const client = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    const { data: { user } } = await client.auth.getUser(token);
+    return user;
+  } catch { return null; }
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -10,6 +23,10 @@ export async function POST(req: NextRequest) {
   if (!name || !tagline || !url || !category_id) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
+
+  // Get logged-in user if available
+  const token = req.headers.get('authorization')?.replace('Bearer ', '') ?? null;
+  const user = await getUserFromToken(token);
 
   let appId: string | null = null;
 
@@ -29,6 +46,7 @@ export async function POST(req: NextRequest) {
       featured: false,
       approved: false,
       review_status: 'pending',
+      author_user_id: user?.id ?? null,
     }).select().single();
 
     if (error) throw error;
@@ -38,12 +56,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, pending: true });
   }
 
-  // Run review after response is sent — after() keeps the function alive
   if (appId) {
     const id = appId;
-    after(async () => {
-      await runReview(id);
-    });
+    after(async () => { await runReview(id); });
   }
 
   return NextResponse.json({ success: true, appId, message: 'Submitted! Your app is being reviewed automatically.' });

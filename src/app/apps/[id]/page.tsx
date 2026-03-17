@@ -19,6 +19,15 @@ export default function AppDetailPage() {
   const favorited = favorites.has(id);
 
   useEffect(() => {
+    // Track view (fire and forget)
+    if (id && !id.startsWith('seed-')) {
+      fetch('/api/views', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appId: id }),
+      }).catch(() => {});
+    }
+
     const savedVotes = JSON.parse(localStorage.getItem('webbox_votes') ?? '[]');
     setVoted(savedVotes.includes(id));
 
